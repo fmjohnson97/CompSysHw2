@@ -56,25 +56,15 @@ int main(int argc, char *argv[]) {
 	free(Array);
 	return 0;
 }
-
-
-void* primeCheck(void * data) {	//check if prime number is prime and edit array
-
-	struct newThread *information = (struct newThread *) data; 
-
-	int num = information->num; 
-  int i,j;
-  
-	for (i = 2; i <= num; i++) { 
-		if (information->TFarray[i] == true) {
-			for (j = i*i; j <= num; j += i)
-				information->TFarray[j] = false;
-		}
-	}
-
-	pthread_exit(NULL); 
+int digRev(int num) {  //reverse the digits
+    int reverse = 0;
+    while(num > 0)
+    {
+        reverse = reverse*10 + num%10;
+        num = num/10;
+    }
+    return reverse;
 }
-
 void* primeReverse(void * data) { //check if reversed number is prime and edit array
 
 	printf("\nPrime numbers, digit reversed less than inputed n:\n");
@@ -95,12 +85,19 @@ void* primeReverse(void * data) { //check if reversed number is prime and edit a
 	pthread_exit(NULL); //wait for thread 
 }
 
-int digRev(int num) {  //reverse the digits
-    int reverse = 0;
-    while(num > 0)
-    {
-        reverse = reverse*10 + num%10;
-        num = num/10;
-    }
-    return reverse;
+void* primeCheck(void * data) {	//check if prime number is prime and edit array
+
+	struct newThread *information = (struct newThread *) data; 
+
+	int num = information->num; 
+  int i,j;
+  
+	for (i = 2; i <= num; i++) { 
+		if (information->TFarray[i] == true) {
+			for (j = i*i; j <= num; j += i)
+				information->TFarray[j] = false;
+		}
+	}
+
+	pthread_exit(NULL); 
 }
