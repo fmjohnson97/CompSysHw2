@@ -13,49 +13,6 @@ struct newThread{
 	bool * TFarray;
 };
 
-void* primeCheck(void * data);
-void* primeReverse(void * data);
-
-
-int main(int argc, char *argv[]) {
-  
-  int n;
-  printf("Enter a number N, so we can calculate Primes less than N: ");
-  scanf("%d",&n);
-	
-  int i;
-
-	bool *Array = malloc((n + 1) * sizeof(*Array));
-	for (i = 0; i < n+1; i++) 
-		Array[i] = true; 			
-
-	struct newThread cont;
-	cont.num = n;				
-	cont.TFarray = Array; 	
-
-	pthread_t tid;
-
-
-	pthread_create(&tid, NULL, primeCheck, (void *) &cont); 
-
-	pthread_join(tid, NULL); 			
-	printf("Prime numbers that are less than inputed n:\n");
-
-	for ( i = 2; i <= n; i++) {
-		if (Array[i] == true) 			
-			printf("%d\n", i);
-	}
-
-
-	pthread_create(&tid, NULL, primeReverse, (void *) &cont); 
-
-
-	pthread_join(tid, NULL); 			
-
-
-	free(Array);
-	return 0;
-}
 int digRev(int num) {  //reverse the digits
     int reverse = 0;
     while(num > 0)
@@ -100,4 +57,44 @@ void* primeCheck(void * data) {	//check if prime number is prime and edit array
 	}
 
 	pthread_exit(NULL); 
+}
+
+int main(int argc, char *argv[]) {
+  
+  int n;
+  printf("Enter a number N, so we can calculate Primes less than N: ");
+  scanf("%d",&n);
+	
+  int i;
+
+	bool *Array = malloc((n + 1) * sizeof(*Array));
+	for (i = 0; i < n+1; i++) 
+		Array[i] = true; 			
+
+	struct newThread cont;
+	cont.num = n;				
+	cont.TFarray = Array; 	
+
+	pthread_t tid;
+
+
+	pthread_create(&tid, NULL, primeCheck, (void *) &cont); 
+
+	pthread_join(tid, NULL); 			
+	printf("Prime numbers that are less than inputed n:\n");
+
+	for ( i = 2; i <= n; i++) {
+		if (Array[i] == true) 			
+			printf("%d\n", i);
+	}
+
+
+	pthread_create(&tid, NULL, primeReverse, (void *) &cont); 
+
+
+	pthread_join(tid, NULL); 			
+
+
+	free(Array);
+	return 0;
 }
