@@ -1,38 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <string.h>
 #include <pthread.h>
-
-// compiled with command: 	gcc -o p1 main.c -lm -lpthread
-
+#include <unistd.h>
 
 typedef enum { false, true } bool; 
 
-struct threadData{
+struct newThread{
 	int num;
-	bool * myArray;
+	bool * TFarray;
 };
-
 
 void* primeCheck(void * data);
 void* primeReverse(void * data);
 
 
-
 int main(int argc, char *argv[]) {
   
   int n;
-  printf("Enter a number N, so we can calculate Primes less than N\n");
+  printf("Enter a number N, so we can calculate Primes less than N: ");
   scanf("%d",&n);
 	
   int i;
 
-	bool *A = malloc((n + 1) * sizeof(*A));
+	bool *Array = malloc((n + 1) * sizeof(*Array));
 	for (i = 0; i < n+1; i++) 
-		A[i] = true; 			
+		Array[i] = true; 			
 
-	struct threadData cont;
+	struct newThread cont;
 	cont.num = n;				
-	cont.myArray = A; 	
+	cont.TFarray = Array; 	
 
 	pthread_t tid;
 
@@ -40,10 +39,10 @@ int main(int argc, char *argv[]) {
 	pthread_create(&tid, NULL, primeCheck, (void *) &cont); 
 
 	pthread_join(tid, NULL); 			
-	printf("Primes less than n:\n");
+	printf("Prime numbers that are less than inputed n:\n");
 
 	for ( i = 2; i <= n; i++) {
-		if (A[i] == true) 			
+		if (Array[i] == true) 			
 			printf("%d\n", i);
 	}
 
@@ -53,56 +52,55 @@ int main(int argc, char *argv[]) {
 
 	pthread_join(tid, NULL); 			
 
-	printf("\n");
 
-	free(A);
+	free(Array);
 	return 0;
 }
 
 
-void* primeCheck(void * data) {	
+void* primeCheck(void * data) {	//check if prime number is prime and edit array
 
-	struct threadData *information = (struct threadData *) data; 
+	struct newThread *information = (struct newThread *) data; 
 
 	int num = information->num; 
   int i,j;
   
 	for (i = 2; i <= num; i++) { 
-		if (information->myArray[i] == true) {
+		if (information->TFarray[i] == true) {
 			for (j = i*i; j <= num; j += i)
-				information->myArray[j] = false;
+				information->TFarray[j] = false;
 		}
 	}
 
 	pthread_exit(NULL); 
 }
 
-void* primeReverse(void * data) {
+void* primeReverse(void * data) { //check if reversed number is prime and edit array
 
-	printf("\nPrime Reversable Numbers:\n");
+	printf("\nPrime numbers, digit reversed less than inputed n:\n");
   int i,j; 
-	struct threadData *information = (struct threadData *) data; 
+	struct newThread *information = (struct newThread *) data; 
 
 	int num = information->num; 
 	int reversedDigits = 0;
 	
 	for ( i = 2; i <= num; i++) {	
-		if (information->myArray[i] == true) {	
+		if (information->TFarray[i] == true) {	
 			reversedDigits = digRev(i);
-			if (information->myArray[reversedDigits] == true) 
+			if (information->TFarray[reversedDigits] == true) 
 				printf("%d\n", i);
 		}
 	}
 
-	pthread_exit(NULL); 
+	pthread_exit(NULL); //wait for thread 
 }
 
-int digRev(int num) {
-    int rev_num = 0;
+int digRev(int num) {  //reverse the digits
+    int reverse = 0;
     while(num > 0)
     {
-        rev_num = rev_num*10 + num%10;
+        reverse = reverse*10 + num%10;
         num = num/10;
     }
-    return rev_num;
+    return reverse;
 }
