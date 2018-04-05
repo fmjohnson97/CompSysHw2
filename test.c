@@ -7,43 +7,43 @@
 #include <errno.h>
 
 int ratio; 
-int tempratio;
 sem_t childSem;
 sem_t teachSem;
 pthread_mutex_t oneTeach;
 
 void verify_compliance(){
-	int curr_teach; // current number of teachers
-	sem_getvalue(&teachSem, &curr_teach);
-	int curr_child; // current number of children
-	sem_getvalue(&childSem, &curr_child);
 
-	if ( curr_teach!= 0 ){
-		tempratio = curr_child/curr_teach;
-	}
 
-	else{
-		if (curr_child == 0){
-		tempratio = 0;
-	}
-
-	else{
-		tempratio == 10000000;
-	}
-
-	}
-
-	//sem_post(&r_mutex); // unlock the resources
-
-	if (tempratio <= ratio){ // if the compliance is verified
-	printf("Parent %u has verified compliance!\n", (int) pthread_self());
-	}
-
-	else{
-	printf("Parent %u is unsatisfied because the regulation is not met!\n", (int) pthread_self());
-	
-	}
-
+    int teachersInRoom;
+    int childrenInRoom;
+    float testRatio;
+    
+    sem_getvalue(&teachSem,&teachersInRoom);// gets number of teachers currently in room
+    sem_getvalue(&childSem,&childrenInRoom);
+    
+   if(teachersInRoom!=0){//teachers present
+       testRatio =childrenInRoom/(teachersInRoom);
+   } 
+   else{ //no teachers
+       if(childrenInRoom==0){//no children
+           //room empty
+           printf("Parent %u see an empty room Compliance met\n",(int)pthread_self());
+       }
+       else{//children in room
+          // parents angry
+          printf("Parent %u sees Children present with no teachers. Compliance not met\n",(int)pthread_self());
+       }
+       
+   }
+   if(testRatio<=ratio){
+      //parents happy
+      printf("Parent %u sees Ratio met, Compliance met\n",(int)pthread_self());
+   }
+   else{
+       //parents angry
+       printf("Parent %u sees Ratio not met,Compliance not met\n",(int)pthread_self());
+   }
+   
 }
 void parent_exit(){
     printf("Parent %u has left the class.\n",(int)pthread_self());
@@ -58,7 +58,7 @@ void child_exit(){
 }
 void learn(){
  //  printf("Child %u is learning.\n",(int)pthread_self());
-    sleep(10);
+    sleep(3);
     
 }
 void child_enter(){
@@ -77,67 +77,44 @@ void teacher_enter(){
 
 void teach(){
   //  printf("Teacher %u is teaching the class.\n",(int)pthread_self());
-    sleep(10); //wait for kids to leave
+    sleep(3); //wait for kids to leave
     
 }
 void teacher_exit(){
 
     int teachersInRoom;
     int childrenInRoom;
-    int testRatio;
+    float testRatio;
 
     printf("Teacher %u is trying to exit the room.\n",(int)pthread_self());
     
     sem_getvalue(&teachSem,&teachersInRoom);// gets number of teachers currently in room
     sem_getvalue(&childSem,&childrenInRoom);
     
-//   if(teachersInRoom-1!=0){
-//       testRatio =childrenInRoom/(teachersInRoom-1);
-//   } 
-//   else{ //1 teacher left
-//       if(childrenInRoom==0){
-//           sem_wait(&teachSem); //no children left teacher can leave
-//           printf("Teacher %u has left class.\n",(int)pthread_self());
-//           exit(1);
-//       }
-//       else{
-//           printf("The last teacher %u cant leave the room there are children left!.\n",(int)pthread_self());
-//           teach(); //there are still children in room teacher cant leave
-//           teacher_exit();
-//       }
-//   }
-//   if(testRatio<=ratio){
-//       sem_wait(&teachSem);
-//       printf("Teacher %u has exited the classRoom.\n",(int)pthread_self());
-//   }
-//   else{
-//          printf("The teacher %u can't leave yet there are too many children in class.\n",(int)pthread_self());
-//           teach(); //there are still children in room teacher cant leave
-//           teacher_exit();
-//   }
-     
-    if((teachersInRoom-1)!=0){
-        testRatio=childrenInRoom/(teachersInRoom-1);
-    }
-    else{
-        if(childrenInRoom==0){
-            testRatio=0;
-        }
-        else{
-        testRatio=1000000000;
-        }
-    }
-    
-    if(testRatio<=ratio){
-        sem_wait(&teachSem);
-        printf("Teacher %u has gone home\n");
-    }
-    else{
-         printf("Teacher %u must stay to keep ratio.\n",(int)pthread_self());
-         teach();
-         teacher_exit();
-    }
-    
+   if(teachersInRoom-1!=0){
+       testRatio =childrenInRoom/(teachersInRoom-1);
+   } 
+   else{ //1 teacher left
+       if(childrenInRoom==0){
+           sem_wait(&teachSem); //no children left teacher can leave
+           printf("Teacher %u has left class.\n",(int)pthread_self());
+           exit(1);
+       }
+       else{
+           printf("The last teacher %u cant leave the room there are children left!\n",(int)pthread_self());
+           teach(); //there are still children in room teacher cant leave
+           teacher_exit();
+       }
+   }
+   if(testRatio<=ratio){
+       sem_wait(&teachSem);
+       printf("Teacher %u has exited the classRoom.\n",(int)pthread_self());
+   }
+   else{
+          printf("The teacher %u can't leave yet there are too many children in class.\n",(int)pthread_self());
+           teach(); //there are still children in room teacher cant leave
+           teacher_exit();
+   }
 }
 
 
@@ -180,7 +157,7 @@ void Parent(){
 		for (;;) {
 
 			parent_enter();
-			//verify_compliance();
+		verify_compliance();
 			parent_exit();
 			go_home();
 
@@ -219,7 +196,7 @@ int main(int argc, char ** argv){
   int m;
   
   for(m=0;m<numTeachers;m++){ //teachers must enter first
-     pthread_create(&t_tid[numTeachers],&attr,(void*)Teacher,NULL);
+     pthread_create(&t_tid[m],&attr,(void*)Teacher,NULL);
    }
     
     sleep(1);
@@ -230,20 +207,16 @@ int main(int argc, char ** argv){
 	}
    
   for(m=0;m<numParents;m++){ //parents last
-    pthread_create(&p_tid[numParents],&attr,(void*)Parent,NULL);
-    sleep(3);
+    pthread_create(&p_tid[m],&attr,(void*)Parent,NULL);
   }
  // reap the threads
- 
- printf(" I GET HERE\n " );
+
   for(m=0;m<numTeachers;m++){
 		pthread_join(t_tid[m],NULL);
 	}
- printf(" I GET HERE 2\n " );
 	for(m=0;m<numChildren;m++){
 		pthread_join(c_tid[m], NULL);
 	}
- printf(" I GET HERE3\n " );
 	for(m=0;m<numParents;m++){
 		pthread_join(p_tid[m], NULL);
 	}
