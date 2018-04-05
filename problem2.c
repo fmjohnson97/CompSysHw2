@@ -61,11 +61,18 @@ void* primeCheck(void * data) {	//check if prime number is prime and edit array
 
 int main(int argc, char *argv[]) {
   
-  int n;
-  printf("Enter a number N, so we can calculate Primes less than N: ");
-  scanf("%d",&n);
-	
-  int i;
+  int n,i;
+  
+  if(argc<2){
+      printf("Enter a number N, so we can calculate Primes less than N: ");
+      scanf("%d",&n);
+	}
+ else{
+    n = atoi(argv[1]);
+ }
+ 
+   pthread_attr_t attr;
+   pthread_attr_init(&attr);
 
 	bool *Array = malloc((n + 1) * sizeof(*Array)); // create boolean array
 	for (i = 0; i < n+1; i++) {
@@ -73,13 +80,14 @@ int main(int argc, char *argv[]) {
   }
   
 	struct newThread cont;
-	cont.num = n;				
+	
+  cont.num = n;				
 	cont.TFarray = Array; 	
 
 	pthread_t tid;
 
 
-	pthread_create(&tid, NULL, primeCheck, (void *) &cont); 
+	pthread_create(&tid, &attr, primeCheck, (void *) &cont); 
 
 	pthread_join(tid, NULL); 			
 	printf("Prime numbers that are less than inputed n:\n");
@@ -90,7 +98,7 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	pthread_create(&tid, NULL, primeReverse, (void *) &cont); 
+	pthread_create(&tid, &attr, primeReverse, (void *) &cont); 
 	pthread_join(tid, NULL); 			
 
 }
