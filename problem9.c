@@ -6,6 +6,10 @@
 #include <unistd.h> 
 #include <errno.h>
 
+//how to compile: gcc problem9.c -lpthread 
+//how to run: ./a.out **input number of children**_**input number of teachers**_**input number of parents**
+//example: ./a.out 2 1 1 
+
 int ratio; 
 sem_t childSem;
 sem_t teachSem;
