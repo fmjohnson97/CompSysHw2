@@ -67,10 +67,11 @@ int main(int argc, char *argv[]) {
 	
   int i;
 
-	bool *Array = malloc((n + 1) * sizeof(*Array));
-	for (i = 0; i < n+1; i++) 
-		Array[i] = true; 			
-
+	bool *Array = malloc((n + 1) * sizeof(*Array)); // create boolean array
+	for (i = 0; i < n+1; i++) {
+		Array[i] = true; 	//initialize array to true		
+  }
+  
 	struct newThread cont;
 	cont.num = n;				
 	cont.TFarray = Array; 	
@@ -90,11 +91,6 @@ int main(int argc, char *argv[]) {
 
 
 	pthread_create(&tid, NULL, primeReverse, (void *) &cont); 
-
-
 	pthread_join(tid, NULL); 			
 
-
-	free(Array);
-	return 0;
 }
