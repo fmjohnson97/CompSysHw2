@@ -207,7 +207,6 @@ int main(int argc, char ** argv){
     
 	for(m=0;m<numChildren;m++){ //children will go second doesnt make sense for parents to check before children arrive
 		pthread_create(&c_tid[m],&attr,(void *) Child, NULL);
-   //sleep(1);
 	}
    
   for(m=0;m<numParents;m++){ //parents last
